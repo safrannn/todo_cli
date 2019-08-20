@@ -1,2 +1,2 @@
 # todo_cli
-a cli todo list with golang
+a simple cli todo list with golang
