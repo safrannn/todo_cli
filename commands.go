@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"strconv"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -60,31 +59,29 @@ func addCommand(app *cli.App) *cli.App {
 
 	done := cli.Command{
 		Name:    "done",
-		Aliases: []string{"c"},
+		Aliases: []string{"d"},
 		Usage:   "complete a task on the list",
 		Action: func(c *cli.Context) error {
-			index, _ := strconv.Atoi(strings.TrimSpace(c.Args().First()))
+			todoText := strings.TrimSpace(c.Args().First())
 
-			stmt, errrow := db.Prepare("UPDATE todo SET status=? where index=?")
+			//update task
+			stmt, errrow := db.Prepare("UPDATE todo SET status=? where text=?")
 			checkErr(errrow)
 
-			res, errres := stmt.Exec(true, index)
+			res, errres := stmt.Exec(true, todoText)
 			checkErr(errres)
 
-			affect, erraffect := res.RowsAffected()
-			checkErr(erraffect)
+			rowAff, errAff := res.RowsAffected()
+			checkErr(errAff)
 
-			fmt.Println(affect)
-
-			text, errtext := db.Prepare("SELECT * FROM todo where index=?")
-			checkErr(errtext)
-
-			res, errres = text.Exec(index)
-			checkErr(errres)
+			if rowAff == 0 {
+				fmt.Println("task [", todoText, "] doesn't exist")
+				return nil
+			}
 
 			db.Close()
 
-			fmt.Println("task [", res, "] completed")
+			fmt.Println("task [", todoText, "] completed")
 			return nil
 		},
 	}
@@ -99,13 +96,8 @@ func addCommand(app *cli.App) *cli.App {
 			stmt, errstmt := db.Prepare("INSERT INTO todo (text) values(?)")
 			checkErr(errstmt)
 
-			res, errres := stmt.Exec(newTodoText)
+			_, errres := stmt.Exec(newTodoText)
 			checkErr(errres)
-
-			id, errid := res.LastInsertId()
-			checkErr(errid)
-
-			fmt.Println(id)
 
 			fmt.Println("task [", newTodoText, "] added")
 			return nil
