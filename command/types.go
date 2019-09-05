@@ -1,4 +1,4 @@
-package main
+package command
 
 //Todo is used to store a text and status of single task
 type Todo struct {

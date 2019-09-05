@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"todo_cli/command"
 
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/urfave/cli"
 )
 
@@ -19,7 +21,7 @@ func main() {
 
 	//create cli commands, including showing todo list, add a task and remove a task
 	app.Commands = []cli.Command{}
-	app = addCommand(app)
+	app = command.CreateCommand(app)
 	fmt.Println(os.Args)
 	err := app.Run(os.Args)
 	if err != nil {
